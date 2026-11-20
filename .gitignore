@@ -1,0 +1,23 @@
+# Never commit keys or meetings
+.env
+.env.*
+*.pem
+*.key
+*credentials*.json
+*service-account*.json
+meetings/
+*.mp4
+*.m4a
+*.mp3
+*.wav
+*.webm
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Release build
+dist/

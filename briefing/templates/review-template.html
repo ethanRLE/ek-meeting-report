@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Meeting review — {{PARTICIPANTS}} — {{DATE_SHORT}}</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --surface-2: #fbfbfd;
+      --ink: #1d1d1f;
+      --muted: #6e6e73;
+      --hair: rgba(0, 0, 0, .08);
+      --accent: #0a66d9;
+      --glass: rgba(255, 255, 255, .72);
+      --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 8px 24px rgba(0, 0, 0, .06);
+      --shadow-lift: 0 2px 4px rgba(0, 0, 0, .05), 0 16px 40px rgba(0, 0, 0, .09);
+      /* one colour per person; used for owners, cards and quote marks */
+      --p1: #0a66d9;  --p1-soft: rgba(10, 102, 217, .10);
+      --p2: #c2410c;  --p2-soft: rgba(194, 65, 12, .10);
+      --p3: #15803d;  --p3-soft: rgba(21, 128, 61, .10);
+      --p4: #7c3aed;  --p4-soft: rgba(124, 58, 237, .10);
+      --p5: #be185d;  --p5-soft: rgba(190, 24, 93, .10);
+      --generic: #6e6e73; --generic-soft: rgba(110, 110, 115, .10);
+      --radius: 18px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #000000;
+        --surface: #1c1c1e;
+        --surface-2: #232326;
+        --ink: #f5f5f7;
+        --muted: #a1a1a6;
+        --hair: rgba(255, 255, 255, .10);
+        --accent: #4aa3ff;
+        --glass: rgba(28, 28, 30, .72);
+        --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
+        --shadow-lift: 0 2px 4px rgba(0, 0, 0, .5), 0 16px 40px rgba(0, 0, 0, .5);
+        --p1: #4aa3ff;  --p1-soft: rgba(74, 163, 255, .16);
+        --p2: #ff9f5a;  --p2-soft: rgba(255, 159, 90, .16);
+        --p3: #4cd57a;  --p3-soft: rgba(76, 213, 122, .16);
+        --p4: #b794ff;  --p4-soft: rgba(183, 148, 255, .16);
+        --p5: #ff7ab6;  --p5-soft: rgba(255, 122, 182, .16);
+        --generic: #a1a1a6; --generic-soft: rgba(161, 161, 166, .16);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+    body {
+      margin: 0;
+      font: 100%/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+      font-optical-sizing: auto;
+      color: var(--ink);
+      background:
+        radial-gradient(60rem 28rem at 12% -6%, var(--p1-soft), transparent 70%),
+        radial-gradient(48rem 24rem at 92% 2%, var(--p2-soft), transparent 70%),
+        radial-gradient(40rem 22rem at 55% 12%, var(--p3-soft), transparent 70%),
+        var(--bg);
+      background-repeat: no-repeat;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 72rem; margin: 0 auto; padding: 0 1.25rem 5rem; }
+
+    /* ── Hero ─────────────────────────────────────────── */
+    header { padding: 4.5rem 0 2.25rem; }
+    .kicker {
+      display: inline-block; margin: 0 0 1rem;
+      padding: .3rem .75rem; border-radius: 999px;
+      font-size: .75rem; font-weight: 600; letter-spacing: .02em;
+      color: var(--accent); background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    h1 {
+      margin: 0 0 1.1rem;
+      font: 700 clamp(2.2rem, 4.6vw, 3.6rem)/1.04 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+      letter-spacing: -.035em;
+    }
+    h1 .lead { color: var(--muted); font-weight: 600; }
+    .meta { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0; padding: 0; list-style: none; }
+    .meta li {
+      padding: .4rem .85rem; border-radius: 999px;
+      font-size: .85rem; font-weight: 500; color: var(--ink);
+      background: var(--glass);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--hair);
+    }
+
+    /* ── Floating glass nav ───────────────────────────── */
+    nav {
+      position: sticky; top: .75rem; z-index: 10;
+      display: flex; gap: .25rem; width: fit-content; max-width: 100%; overflow-x: auto;
+      margin: 0 0 2.5rem; padding: .3rem;
+      border-radius: 999px; border: 1px solid var(--hair);
+      background: var(--glass);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      backdrop-filter: blur(20px) saturate(180%);
+      box-shadow: var(--shadow);
+      scrollbar-width: none;
+    }
+    nav::-webkit-scrollbar { display: none; }
+    nav a {
+      padding: .45rem 1rem; border-radius: 999px; white-space: nowrap;
+      font-size: .875rem; font-weight: 500; color: var(--ink); text-decoration: none;
+      transition: background-color 150ms ease-out, transform 100ms ease-out;
+    }
+    nav a:hover { background: var(--hair); }
+    nav a:active { transform: scale(.97); }
+
+    /* ── Sections as surfaces ─────────────────────────── */
+    .section {
+      margin: 0 0 1.5rem; padding: 2rem 2.25rem;
+      background: var(--surface); border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    h2 {
+      margin: 0 0 1.25rem;
+      font-size: 1.6rem; font-weight: 700; line-height: 1.15; letter-spacing: -.022em;
+    }
+    h2 .eyebrow {
+      display: block; margin-bottom: .35rem;
+      font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent);
+    }
+    p { margin: 0 0 .9rem; }
+    ul { margin: .25rem 0 1rem; padding-left: 1.2rem; }
+    li { margin: .35rem 0; }
+    li::marker { color: var(--muted); }
+    strong { font-weight: 650; }
+
+    #summary .body p { font-size: 1.125rem; line-height: 1.6; letter-spacing: -.005em; max-width: 62rem; }
+    #summary .body p:first-child { font-size: 1.3rem; line-height: 1.5; font-weight: 500; letter-spacing: -.012em; }
+
+    /* ── Action items ─────────────────────────────────── */
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .95rem; }
+    th {
+      padding: 0 .9rem .6rem; text-align: left;
+      font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+    }
+    td { padding: .8rem .9rem; vertical-align: top; border-top: 1px solid var(--hair); }
+    tbody tr { transition: background-color 150ms ease-out; }
+    tbody tr:hover { background: var(--surface-2); }
+    td.owner { width: 1%; white-space: nowrap; font-weight: 650; font-size: .85rem; }
+    td.owner::before {
+      content: ""; display: inline-block; width: .55rem; height: .55rem; margin-right: .5rem;
+      border-radius: 50%; background: currentColor; vertical-align: .05rem;
+    }
+
+    /* ── People ───────────────────────────────────────── */
+    .people { display: grid; gap: 1rem; }
+    @media (min-width: 640px) { .people { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 1100px) { .people { grid-template-columns: repeat(3, 1fr); } }
+    .card {
+      position: relative; overflow: hidden;
+      padding: 1.4rem 1.4rem 1.2rem; border-radius: 14px;
+      background: var(--surface-2); border: 1px solid var(--hair);
+      transition: transform 200ms cubic-bezier(.2, .8, .2, 1), box-shadow 200ms ease-out;
+    }
+    .card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--person, var(--generic)); }
+    .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+    .card:has(.who.p1) { --person: var(--p1); --person-soft: var(--p1-soft); }
+    .card:has(.who.p2) { --person: var(--p2); --person-soft: var(--p2-soft); }
+    .card:has(.who.p3) { --person: var(--p3); --person-soft: var(--p3-soft); }
+    .card:has(.who.p4) { --person: var(--p4); --person-soft: var(--p4-soft); }
+    .card:has(.who.p5) { --person: var(--p5); --person-soft: var(--p5-soft); }
+    .who {
+      display: flex; align-items: center; gap: .6rem; margin: 0 0 .75rem;
+      font-size: 1.15rem; font-weight: 700; letter-spacing: -.01em; color: var(--person, var(--ink));
+    }
+    .who::before {
+      content: ""; width: 2.1rem; height: 2.1rem; border-radius: 50%; flex: none;
+      background: radial-gradient(circle at 30% 30%, var(--surface), transparent 60%), var(--person-soft, var(--generic-soft));
+      border: 2px solid var(--person, var(--generic));
+    }
+    .role { font-size: .8rem; font-weight: 500; color: var(--muted); }
+    .card p:not(.who) { font-size: .95rem; color: var(--ink); margin: 0; }
+
+    /* ── Topics ───────────────────────────────────────── */
+    #topics .body { counter-reset: topic; }
+    #topics h3 {
+      display: flex; align-items: center; gap: .75rem;
+      margin: 2.25rem 0 1rem; font-size: .8rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--accent);
+    }
+    #topics h3:first-child { margin-top: 0; }
+    #topics h3::after { content: ""; flex: 1; height: 1px; background: var(--hair); }
+    #topics h4 {
+      counter-increment: topic;
+      display: flex; align-items: baseline; gap: .7rem;
+      margin: 1.6rem 0 .6rem; font-size: 1.25rem; font-weight: 650; line-height: 1.25; letter-spacing: -.015em;
+    }
+    #topics h4::before {
+      content: counter(topic, decimal-leading-zero);
+      font-size: .8rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted);
+    }
+    #topics p:has(> strong:only-child) {
+      display: inline-block; margin: .4rem 0 .2rem; padding: .2rem .65rem; border-radius: 999px;
+      font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; background: var(--hair);
+    }
+    blockquote {
+      position: relative; margin: 1rem 0 1.4rem; padding: 1.1rem 1.4rem 1rem 3.2rem;
+      border-radius: 14px; background: var(--surface-2); border: 1px solid var(--hair);
+      font-size: 1.05rem; line-height: 1.5; letter-spacing: -.008em; font-weight: 500;
+    }
+    blockquote::before {
+      content: "\201C"; position: absolute; left: 1rem; top: .35rem;
+      font: 700 2.8rem/1 Georgia, "Times New Roman", serif; color: var(--accent); opacity: .55;
+    }
+    blockquote cite {
+      display: block; margin-top: .5rem; font-style: normal;
+      font-size: .8rem; font-weight: 600; letter-spacing: .02em; color: var(--muted);
+    }
+
+    footer { margin-top: 2.5rem; text-align: center; font-size: .8rem; color: var(--muted); }
+
+    /* ── Talk time (compact, in the header) ─────────── */
+    .talk { margin: 1.1rem 0 0; max-width: 26rem; }
+    .talk-bar { display: flex; height: .45rem; border-radius: 999px; overflow: hidden; background: var(--hair); }
+    .talk-bar span { background: currentColor; }
+    .talk-legend { display: flex; flex-wrap: wrap; gap: .2rem 1.1rem; margin: .5rem 0 0; padding: 0; list-style: none; font-size: .85rem; font-weight: 650; }
+    .talk-legend li { margin: 0; }
+    .talk-legend li::before { content: ""; display: inline-block; width: .5rem; height: .5rem; margin-right: .4rem; border-radius: 50%; background: currentColor; }
+    .talk-legend span { color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+    .talk-note { margin: .35rem 0 0; font-size: .75rem; color: var(--muted); }
+    /* owner colours (table + card name) */
+    .p1 { color: var(--p1); } .p2 { color: var(--p2); } .p3 { color: var(--p3); }
+    .p4 { color: var(--p4); } .p5 { color: var(--p5); } .generic { color: var(--generic); }
+
+    @media (max-width: 640px) {
+      header { padding-top: 2.5rem; }
+      .section { padding: 1.4rem 1.2rem; border-radius: 14px; }
+      blockquote { padding-left: 2.6rem; }
+      #summary .body p:first-child { font-size: 1.15rem; }
+      #summary .body p { font-size: 1rem; }
+    }
+    @media (prefers-reduced-transparency: reduce) {
+      nav, .meta li { background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .card, nav a, tbody tr { transition: none; }
+      .card:hover { transform: none; }
+    }
+    @media print {
+      body { background: #fff; color: #000; }
+      .wrap { max-width: none; padding: 0; }
+      header { padding: 0 0 1rem; }
+      nav { display: none; }
+      .section { box-shadow: none; border: 1px solid #ddd; break-inside: avoid-page; }
+      .card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <article class="wrap">
+    <header>
+      <p class="kicker">Meeting review</p>
+      <h1><span class="lead">Meeting review</span><br />{{PARTICIPANTS}}</h1>
+      <ul class="meta">
+        <li>{{DATE_LONG}}</li>
+        <li>{{DURATION}}</li>
+        <li>{{PARTICIPANT_COUNT}} participants</li>
+      </ul>
+      {{TALK_TIME}}
+    </header>
+
+    <nav>
+      <a href="#summary">Summary</a>
+      <a href="#actions">Action items</a>
+      {{OPEN_QUESTIONS_NAV}}
+      <a href="#people">Who said what</a>
+      <a href="#topics">Topics</a>
+    </nav>
+
+    <section class="section" id="summary">
+      <h2><span class="eyebrow">At a glance</span>Summary</h2>
+      <div class="body">
+        {{SUMMARY_HTML}}
+      </div>
+    </section>
+
+    <section class="section" id="actions">
+      <h2><span class="eyebrow">Next steps</span>Action items</h2>
+      <table>
+        <thead>
+          <tr><th>Owner</th><th>Item</th></tr>
+        </thead>
+        <tbody>
+          {{ACTION_ROWS}}
+        </tbody>
+      </table>
+    </section>
+
+    {{OPEN_QUESTIONS_SECTION}}
+
+    <section class="section" id="people">
+      <h2><span class="eyebrow">People</span>What each person mainly talked about</h2>
+      <div class="people">
+        {{PEOPLE_CARDS}}
+      </div>
+    </section>
+
+    <section class="section" id="topics">
+      <h2><span class="eyebrow">In detail</span>Topics</h2>
+      <div class="body">
+        {{TOPICS_HTML}}
+      </div>
+    </section>
+
+    <footer>
+      Prepared from the {{DATE_LONG}} meeting between {{PARTICIPANTS}}.
+    </footer>
+  </article>
+</body>
+</html>
