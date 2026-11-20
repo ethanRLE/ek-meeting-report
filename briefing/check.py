@@ -28,6 +28,11 @@ def norm(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
+def speaker_lines(text: str) -> list[str]:
+    """The `Label: words` lines of plain.txt or sanitized.md, in order (chunk headers and blanks skipped)."""
+    return [l for l in text.splitlines() if l.strip() and not l.startswith("--- chunk") and ":" in l]
+
+
 def cited_ranges(text: str) -> list[tuple[int, int]]:
     return [(int(a), int(b or a)) for g in CITE_RE.findall(text) for a, b in _RANGE_RE.findall(g)]
 
@@ -69,10 +74,18 @@ def check_report(run: Path) -> list[str]:
     for p in paths.values():
         if not p.is_file():
             return [f"{p.name} not found in {run}"]
-    total = len(paths["sanitized.md"].read_text(encoding="utf-8").splitlines())
-    plain_norm = norm(paths["plain.txt"].read_text(encoding="utf-8"))
+    sanitized = paths["sanitized.md"].read_text(encoding="utf-8")
+    plain = paths["plain.txt"].read_text(encoding="utf-8")
+    total = len(sanitized.splitlines())
+    plain_norm = norm(plain)
     report = paths["report.md"].read_text(encoding="utf-8")
     problems: list[str] = []
+    # Talk time pairs sanitized.md lines with segments.json one to one, so no line may be lost or merged.
+    s_count, p_count = len(speaker_lines(sanitized)), len(speaker_lines(plain))
+    if s_count != p_count:
+        problems.append(
+            f"sanitized.md has {s_count} speaker lines, plain.txt has {p_count}: a cleaner dropped or merged a line"
+        )
 
     def check_cites(where: str, text: str) -> list[tuple[int, int]]:
         ranges = cited_ranges(text)

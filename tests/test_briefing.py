@@ -109,6 +109,19 @@ def test_no_timestamps_means_no_talk_time(tmp_path: Path) -> None:
     assert "talk-time" not in page and "{{" not in page
 
 
+def test_check_rejects_a_dropped_line(tmp_path: Path) -> None:
+    plain = "--- chunk 1/1 ---\nA: hello there friend\n\nB: and\n\nA: see you on friday then\n"
+    (tmp_path / "plain.txt").write_text(plain, encoding="utf-8")
+    (tmp_path / "sanitized.md").write_text(plain.replace("B: and\n\n", ""), encoding="utf-8")
+    (tmp_path / "report.md").write_text("## Action items\n- Open: meet friday [L4]\n", encoding="utf-8")
+    (tmp_path / "read-receipt.md").write_text(
+        'Closing priorities: friday [L4]\n> "see you on friday then" [L4]\n', encoding="utf-8"
+    )
+    from briefing.check import check_report
+
+    assert check_report(tmp_path) == ["sanitized.md has 2 speaker lines, plain.txt has 3: a cleaner dropped or merged a line"]
+
+
 def test_check_rejects_bad_owner_and_missing_quote(tmp_path: Path) -> None:
     (tmp_path / "plain.txt").write_text("A: hello there friend\n", encoding="utf-8")
     (tmp_path / "sanitized.md").write_text("A: hello there friend\n", encoding="utf-8")

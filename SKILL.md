@@ -118,7 +118,7 @@ Closing priorities: boundary data, then permit [L201-215]
 python -m briefing check --run-dir "<run>"
 ```
 
-It fails when: an action item or quote has no citation or cites a line outside `sanitized.md`; an action item doesn't start with initials or `Open:`; a quote is not in `plain.txt`; nothing cited is in the last quarter of the meeting; there are more than 15 action items; or `read-receipt.md` is missing or doesn't quote the last 5% of the meeting. Fix `report.md` and run it again.
+It fails when: `sanitized.md` and `plain.txt` have a different number of speaker lines; an action item or quote has no citation or cites a line outside `sanitized.md`; an action item doesn't start with initials or `Open:`; a quote is not in `plain.txt`; nothing cited is in the last quarter of the meeting; there are more than 15 action items; or `read-receipt.md` is missing or doesn't quote the last 5% of the meeting. Fix `report.md` and run it again.
 
 Then, if you can start a helper agent with a fresh context, give it only the run folder and this task: read all of `sanitized.md` and `report.md`, and list with line numbers (1) action items or decisions that were changed later in the meeting, or that have the wrong owner or an owner nobody named; (2) commitments missing from the action list; (3) rows to merge or remove (steps of one job, status, asides, undecided questions); (4) claims the transcript does not support. Fix each finding and run the check again. Without helpers, do this review yourself after re-reading the last quarter of `sanitized.md`.
 

@@ -7,7 +7,7 @@ import re
 from datetime import date
 from pathlib import Path
 
-from briefing.check import OWNER_RE, strip_citations
+from briefing.check import OWNER_RE, speaker_lines, strip_citations
 
 TEMPLATE = Path(__file__).resolve().parent / "templates" / "review-template.html"
 _BULLET_RE = re.compile(r"[-*]\s+")
@@ -108,8 +108,7 @@ def _line_labels(run: Path) -> list[str]:
     path = run / "sanitized.md"
     if not path.is_file():
         return []
-    lines = path.read_text(encoding="utf-8").splitlines()
-    return [l.split(":", 1)[0].strip() for l in lines if l.strip() and not l.startswith("--- chunk") and ":" in l]
+    return [l.split(":", 1)[0].strip() for l in speaker_lines(path.read_text(encoding="utf-8"))]
 
 
 def talk_time(run: Path, notes: str) -> list[tuple[str, float]]:
